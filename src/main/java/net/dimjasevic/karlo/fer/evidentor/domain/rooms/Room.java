@@ -15,11 +15,12 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rooms_seq")
     @SequenceGenerator(name = "rooms_seq", sequenceName = "rooms_id_seq", allocationSize = 1)
-    public Long id;
+    private Long id;
     @ManyToOne
-    public Floor floor;
-    public String name;
-    public Boolean deleted;
+    @JoinColumn(name = "floor_id")
+    private Floor floor;
+    private String name;
+    private Boolean deleted;
 
     public Room(Floor floor, String name, Boolean deleted) {
         this.floor = floor;

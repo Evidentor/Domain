@@ -11,11 +11,14 @@
 	<groupId>net.dimjasevic.karlo.fer.evidentor</groupId>
 	<artifactId>domain</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
 	<name>domain</name>
 	<description>Domain lib</description>
 
 	<properties>
 		<java.version>21</java.version>
+		<spring-boot.version>3.4.5</spring-boot.version>
 	</properties>
 
 	<dependencies>
@@ -66,18 +69,6 @@
 					<systemPropertyVariables>
 						<spring.profiles.active>test</spring.profiles.active>
 					</systemPropertyVariables>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
