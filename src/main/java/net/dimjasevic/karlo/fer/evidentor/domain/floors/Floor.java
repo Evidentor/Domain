@@ -33,5 +33,7 @@ public class Floor {
         this.building = building;
         this.index = index;
         this.deleted = deleted;
+
+        this.building.getFloors().add(this);
     }
 }

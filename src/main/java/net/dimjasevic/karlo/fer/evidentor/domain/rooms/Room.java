@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.dimjasevic.karlo.fer.evidentor.domain.floors.Floor;
+import net.dimjasevic.karlo.fer.evidentor.domain.roomvisualizations.RoomVisualization;
 
 @NoArgsConstructor
 @Getter
@@ -22,9 +23,14 @@ public class Room {
     private String name;
     private Boolean deleted;
 
+    @OneToOne(mappedBy = "room", cascade = CascadeType.ALL)
+    private RoomVisualization roomVisualization = null;
+
     public Room(Floor floor, String name, Boolean deleted) {
         this.floor = floor;
         this.name = name;
         this.deleted = deleted;
+
+        this.floor.getRooms().add(this);
     }
 }

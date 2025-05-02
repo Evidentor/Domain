@@ -17,4 +17,13 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
                     "WHERE b.id = :id"
     )
     Optional<Building> findByIdWithRoomsAndFloors(@Param("id") Long buildingId);
+
+    @Query(
+            value = "SELECT b FROM Building b " +
+                    "LEFT JOIN FETCH b.floors f " +
+                    "LEFT JOIN FETCH f.rooms r " +
+                    "LEFT JOIN FETCH RoomVisualization rv ON r.id = rv.roomId " +
+                    "WHERE b.id = :id"
+    )
+    Optional<Building> findByIdWithRoomVisualizations(@Param("id") Long buildingId);
 }
