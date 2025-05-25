@@ -59,6 +59,7 @@ jobs:
           path: database-scripts-repo
 
       - name: Run Liquibase migrations
+        if: steps.check_message.outputs.build_triggered == 'true'
         run: |
           cd database-scripts-repo
           mvn liquibase:update -Ptest
