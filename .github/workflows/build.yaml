@@ -1,0 +1,65 @@
+name: Build and Bump Version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Check for [build] in commit message
+        id: check_message
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+          if [[ "$COMMIT_MSG" == *"[build]"* ]]; then
+            echo "Should build."
+            echo "build_triggered=true" >> $GITHUB_OUTPUT
+          else
+            echo "No build trigger."
+            echo "build_triggered=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if not a build commit
+        if: steps.check_message.outputs.build_triggered == 'false'
+        run: echo "No [build] tag in commit message. Skipping."
+
+      - name: Run tests
+        if: steps.check_message.outputs.build_triggered == 'true'
+        run: mvn verify
+
+      - name: Bump version
+        if: steps.check_message.outputs.build_triggered == 'true'
+        run: |
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Current version: $CURRENT_VERSION"
+          
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$(echo $CURRENT_VERSION | sed 's/-SNAPSHOT//')"
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH-SNAPSHOT"
+          
+          echo "New version: $NEW_VERSION"
+          
+          mvn versions:set -DnewVersion=$NEW_VERSION
+          mvn versions:commit
+
+      - name: Commit new version
+        if: steps.check_message.outputs.build_triggered == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pom.xml
+          git commit -m "Bump version to $NEW_VERSION [skip ci]"
+          git push
