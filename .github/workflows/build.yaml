@@ -9,6 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: evidentor
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 9876:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -35,6 +50,17 @@ jobs:
       - name: Exit if not a build commit
         if: steps.check_message.outputs.build_triggered == 'false'
         run: echo "No [build] tag in commit message. Skipping."
+
+      - name: Checkout Database Scripts repo
+        uses: actions/checkout@v3
+        with:
+          repository: https://github.com/Evidentor/Database-Scripts
+          path: database-scripts-repo
+
+      - name: Run Liquibase migrations
+        run: |
+          cd database-scripts-repo
+          mvn liquibase:update -Ptest
 
       - name: Run tests
         if: steps.check_message.outputs.build_triggered == 'true'
