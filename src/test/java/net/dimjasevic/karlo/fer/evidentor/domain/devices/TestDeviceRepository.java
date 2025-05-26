@@ -1,4 +1,4 @@
-package net.dimjasevic.karlo.fer.evidentor.domain.roomvisualizations;
+package net.dimjasevic.karlo.fer.evidentor.domain.devices;
 
 import net.dimjasevic.karlo.fer.evidentor.domain.TestJpaConfig;
 import net.dimjasevic.karlo.fer.evidentor.domain.buildings.Building;
@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,21 +20,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ContextConfiguration(classes = TestJpaConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class TestRoomVisualizationRepository {
+class TestDeviceRepository {
 
     @Autowired
     private BuildingRepository buildingRepository;
 
     @Autowired
-    private RoomVisualizationRepository repository;
+    private DeviceRepository repository;
 
     @Test
     public void testFindAllWhenRepositoryIsEmpty() {
         // WHEN
-        Iterable<RoomVisualization> floors = repository.findAll();
+        Iterable<Device> devices = repository.findAll();
 
         // THEN
-        assertThat(floors).isEmpty();
+        assertThat(devices).isEmpty();
     }
 
     @Test
@@ -46,22 +47,34 @@ class TestRoomVisualizationRepository {
 
         Room room1 = new Room(floor1, "Room11", false);
         Room room2 = new Room(floor1, "Room12", false);
-        Room room3 = new Room(floor1, "Room13", false);
-        Room room4 = new Room(floor2, "Room21", false);
+        new Room(floor1, "Room13", false);
+        new Room(floor2, "Room21", false);
 
         buildingRepository.save(building);
 
-        RoomVisualization rv1 = new RoomVisualization(room1, (short) 1, (short) 1, (short) 1, (short) 1, false);
-        RoomVisualization rv2 = new RoomVisualization(room2, (short) 2, (short) 2, (short) 2, (short) 2, false);
-        RoomVisualization rv3 = new RoomVisualization(room3, (short) 3, (short) 3, (short) 3, (short) 3, false);
-        RoomVisualization rv4 = new RoomVisualization(room4, (short) 4, (short) 4, (short) 4, (short) 4, false);
+        LocalDateTime now = LocalDateTime.now();
+        Device d1 = new Device(room1, "s1", now, false);
+        Device d2 = new Device(room2, "s2", now, false);
+        Device d3 = new Device("s3", now, false);
 
-        repository.saveAll(List.of(rv1, rv2, rv3, rv4));
+        repository.saveAll(List.of(d1, d2, d3));
 
         // WHEN
         long count = repository.count();
+        Device d1FromDb = repository.findById(d1.getId()).orElse(null);
+        Device d2FromDb = repository.findById(d2.getId()).orElse(null);
+        Device d3FromDb = repository.findById(d3.getId()).orElse(null);
 
         // THEN
-        assertThat(count).isEqualTo(4);
+        assertThat(count).isEqualTo(3);
+        assertThat(d1FromDb).isNotNull();
+        assertThat(d2FromDb).isNotNull();
+        assertThat(d3FromDb).isNotNull();
+        assertThat(d1FromDb.getRoom().getId()).isEqualTo(room1.getId());
+        assertThat(d2FromDb.getRoom().getId()).isEqualTo(room2.getId());
+        assertThat(d3FromDb.getRoom()).isNull();
+        assertThat(d1FromDb.getInstallationDate()).isEqualTo(now);
+        assertThat(d2FromDb.getInstallationDate()).isEqualTo(now);
+        assertThat(d3FromDb.getInstallationDate()).isEqualTo(now);
     }
 }

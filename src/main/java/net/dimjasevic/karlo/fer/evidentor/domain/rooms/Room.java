@@ -4,8 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.dimjasevic.karlo.fer.evidentor.domain.devices.Device;
 import net.dimjasevic.karlo.fer.evidentor.domain.floors.Floor;
 import net.dimjasevic.karlo.fer.evidentor.domain.roomvisualizations.RoomVisualization;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @NoArgsConstructor
 @Getter
@@ -25,6 +29,9 @@ public class Room {
 
     @OneToOne(mappedBy = "room", cascade = CascadeType.ALL)
     private RoomVisualization roomVisualization = null;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Device> devices = new HashSet<>();
 
     public Room(Floor floor, String name, Boolean deleted) {
         this.floor = floor;
