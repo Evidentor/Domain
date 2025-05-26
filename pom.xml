@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>net.dimjasevic.karlo.fer.evidentor</groupId>
 	<artifactId>domain</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>domain</name>
