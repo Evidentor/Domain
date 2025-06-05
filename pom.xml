@@ -17,9 +17,16 @@
 	<description>Domain lib</description>
 
 	<properties>
+		<os.classifier>linux-x86_64</os.classifier>
 		<java.version>21</java.version>
 		<spring-boot.version>3.4.5</spring-boot.version>
-		<os.classifier>linux-x86_64</os.classifier>
+		<spring-grpc.version>0.8.0</spring-grpc.version>
+		<grpc-services.version>1.72.0</grpc-services.version>
+		<protoc-gen-grpc-java.version>1.72.0</protoc-gen-grpc-java.version>
+		<protoc.version>4.30.2</protoc.version>
+		<protobuf-java-util.version>4.31.1</protobuf-java-util.version>
+		<jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
+		<protobuf-maven-plugin.version>3.3.1</protobuf-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -31,20 +38,34 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<!--Dependencies for gRPC-->
 		<dependency>
 			<groupId>org.springframework.grpc</groupId>
 			<artifactId>spring-grpc-spring-boot-starter</artifactId>
-			<version>0.8.0</version>
+			<version>${spring-grpc.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-services</artifactId>
+			<version>${grpc-services.version}</version>	<!--Upper versions do not include reflections API-->
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java-util</artifactId>
+			<version>${protobuf-java-util.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
-			<version>1.3.5</version>	<!-- Must be this version because of generated grpc classes -->
+			<version>${jakarta.annotation-api.version}</version>	<!-- Needed by Tomcat for jakarta.annotation.PostConstruct -->
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
@@ -83,21 +104,29 @@
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
-			<!-- Protobuf Compiler Plugin -->
 			<plugin>
-				<groupId>org.xolstice.maven.plugins</groupId>
+				<groupId>io.github.ascopes</groupId>
 				<artifactId>protobuf-maven-plugin</artifactId>
-				<version>0.6.1</version>
+				<version>${protobuf-maven-plugin.version}</version>
 				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:3.22.2:exe:${os.classifier}</protocArtifact>
-					<pluginId>grpc-java</pluginId>
-					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.54.0:exe:${os.classifier}</pluginArtifact>
+					<sourceDirectories>
+						<sourceDirectory>src/main/proto</sourceDirectory>
+					</sourceDirectories>
+					<protocVersion>${protoc.version}</protocVersion>
+					<binaryMavenPlugins>
+						<binaryMavenPlugin>
+							<groupId>io.grpc</groupId>
+							<artifactId>protoc-gen-grpc-java</artifactId>
+							<version>${protoc-gen-grpc-java.version}</version>
+							<options>jakarta_omit,@generated=omit</options>
+						</binaryMavenPlugin>
+					</binaryMavenPlugins>
 				</configuration>
 				<executions>
 					<execution>
+						<?m2e execute onConfiguration,onIncremental?>
 						<goals>
-							<goal>compile</goal>
-							<goal>compile-custom</goal>
+							<goal>generate</goal>
 						</goals>
 					</execution>
 				</executions>
