@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "net.dimjasevic.karlo.fer.evidentor.domain.proto";
+option java_outer_classname = "DecisionServiceProto";
+
+service DecisionService {
+  rpc CheckAccess (CheckAccessRequest) returns (CheckAccessResponse);
+}
+
+message CheckAccessRequest {
+  int64 deviceId = 1;
+  string cardId = 2;
+  int64 roomId = 3;
+}
+
+message CheckAccessResponse {
+  bool accessGranted = 1;
+  optional string reason = 2;
+}
